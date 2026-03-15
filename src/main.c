@@ -12,8 +12,9 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/zbus/zbus.h>
+#include <zephyr/drivers/uart.h>
 
-LOG_MODULE_DECLARE(zbus, CONFIG_ZBUS_LOG_LEVEL);
+LOG_MODULE_REGISTER(main, LOG_LEVEL_WRN);
 
 ZBUS_CHAN_DECLARE(app_info_chan, sensor_data_chan);
 
@@ -32,7 +33,27 @@ void run_trigger() {
 
 K_TIMER_DEFINE(heartbeat_timer, run_trigger, NULL);
 
+// --- Console
+
+void console_init() {
+    #if DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_console), zephyr_cdc_acm_uart)
+        const struct device *const dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
+        uint32_t dtr = 0;
+
+        /* Poll if the DTR flag was set */
+        while (!dtr) {
+            uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
+            /* Give CPU resources to low priority threads. */
+            k_sleep(K_MSEC(100));
+        }
+    #endif
+}
+
+// ---- Main
+
 int main() {
+    console_init();
+
     struct app_info_msg* app_info = 
         (struct app_info_msg*) zbus_chan_const_msg(&app_info_chan);
 

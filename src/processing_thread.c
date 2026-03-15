@@ -27,8 +27,6 @@ void processing_thread() {
 
     struct sensor_data_msg msg;
 
-    uint32_t data = 0;
-
     while(1) {
         zbus_sub_wait(&processing_thread_sub, &chan, K_FOREVER);
 
@@ -36,10 +34,9 @@ void processing_thread() {
         if (err) {
             LOG_WRN("Could not read data channel. Error code: %d", err);
         } else {
-            data = msg.uv*2;
+            processed_data.value = msg.uv;
         }
-        processed_data.value = data;
-        processed_data.to_save = data;
+        processed_data.to_save = msg.ok;
 
         zbus_chan_pub(&processing_thread_chan, &processed_data, K_MSEC(100));
     }
