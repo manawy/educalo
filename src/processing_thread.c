@@ -43,10 +43,11 @@ void processing_thread() {
 }
 
 K_THREAD_DEFINE(processing_thread_id,
-                1024,
+                2048,
                 processing_thread,
                 NULL, NULL, NULL,
-                4, 0,
-                0);
+                15, 0,
+                1000);
+
 
 

@@ -1,4 +1,5 @@
 #include "processing_thread.h"
+#include "leds_interface.h"
 
 #include <stdint.h>
 #include <zephyr/kernel.h>
@@ -11,15 +12,17 @@ ZBUS_CHAN_DECLARE(processing_thread_chan);
 
 ZBUS_SUBSCRIBER_DEFINE(datalogger_thread_sub, 4);
 
+ZBUS_LISTENER_DEFINE(leds_busy_end_listener, listener_ledbusy_set);
+
 ZBUS_CHAN_DEFINE(datalogger_thread_chan,
                  int,
                  NULL,
                  NULL,
-                 ZBUS_OBSERVERS_EMPTY,
+                 ZBUS_OBSERVERS(leds_busy_end_listener),
                  ZBUS_MSG_INIT(0)
                  );
 
-void datalogger_thread() {
+void datalogger_thread(void) {
     const struct zbus_channel* chan;
 
     struct processing_thread_msg processed_data;
@@ -41,10 +44,10 @@ void datalogger_thread() {
 }
 
 K_THREAD_DEFINE(datalogger_thread_id,
-                1024,
+                2048,
                 datalogger_thread,
                 NULL, NULL, NULL,
-                4, 0,
-                0);
+                16, 0,
+                1000);
 
 

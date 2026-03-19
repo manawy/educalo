@@ -9,5 +9,6 @@ target_sources(app PRIVATE
     src/sensor_thread.c
     src/processing_thread.c
     src/datalogger_thread.c
+    src/leds_interface.c
 )
 target_include_directories(app PRIVATE include)
