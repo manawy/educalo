@@ -1,0 +1,26 @@
+# ADS1115 as sensor configuration options
+
+# Copyright (c) 2026 F. Georget
+# SPDX-License-Identifier: Apache-2.0
+
+menu "custom device drivers"
+
+menuconfig ADS1115SENSOR
+	bool "ADS1115 Differential voltate Sensor"
+	default y
+	depends on DT_HAS_CUSTOM_ADS1115_ENABLED
+	select I2C
+	help
+	  Enable driver for ADS1115 voltage sensor (custom)
+
+if ADS1115SENSOR
+
+config ADS1115SENSOR_CONTINUOUS
+    bool
+    default n
+    help
+      Enables continuous measurement mode
+
+endif # ADS1115SENSOR
+
+endmenu

@@ -4,9 +4,9 @@
 
 
 / {
-    zephyr,user {
+    /*zephyr,user {
         io-channels = <&i2c_adc 0>;
-    };
+    };*/
     chosen {
         zephyr,console = &cdc_acm_uart0;
     };
@@ -14,7 +14,7 @@
         rtc = &ds3231_rtc;
         ledok = &led0;
         ledbusy = &led1;
-        fluxsensor = &i2c_adc;
+        fluxsensor = &ads1115;
         btnstart = &button0;
         boardt = &sht35;
     };
@@ -60,7 +60,7 @@
 &i2c0 {
     status = "okay";
 
-    i2c_adc: ads1115@48 {
+    /*i2c_adc: ads1115@48 {
         status = "okay";
         compatible = "ti,ads1115";
         reg = <0x48>;
@@ -77,6 +77,11 @@
             zephyr,input-negative = <3>;
             zephyr,resolution = <16>;
         };
+    }; */
+    ads1115: ads1115@48 {
+        compatible = "custom,ads1115sensor";
+        reg = <0x48>;
+        status = "okay";
     };
 
     ds3231: ds3231@68 {
