@@ -110,19 +110,45 @@
     };
 };
 
+&pinctrl {
+    spi1_hi: spi1_hi {
+        group1 {
+            pinmux = <SPI1_TX_P31>;
+            drive-strength = <2>;
+        };
+
+        group2 {
+            pinmux = <SPI1_SCK_P30>;
+            drive-strength = <12>;
+        };
+
+        group3 {
+            pinmux = <SPI1_RX_P40>;
+            input-enable;
+            bias-disable;
+        };
+    };
+};
+
 &spi1 {
         status = "okay";
+        clock-frequency = <DT_FREQ_M(1)>;
         cs-gpios = <&gpio0_hi 43 GPIO_ACTIVE_LOW>;
+        pinctrl-0 = <&spi1_hi>;
+        pinctrl-names = "default";
 
-        sdhc0: sdhc@0 {
+        sdhcd0: sdhc@0 {
                 compatible = "zephyr,sdhc-spi-slot";
                 reg = <0>;
                 status = "okay";
-                mmc {
+                spi-max-frequency = <12500000>;
+                //cd-gpios = <&gpio0 22 GPIO_ACTIVE_HIGH>;
+                //power-delay-ms = <5>;
+                sdmmc {
                     compatible = "zephyr,sdmmc-disk";
                     disk-name = "SD";
                     status = "okay";
                 };
-                spi-max-frequency = <24000000>;
         };
+
 };

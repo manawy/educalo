@@ -1,6 +1,6 @@
-#ifndef CALOBUS_APP_H
-#define CALOBUS_APP_H
+#pragma once
 
+#include <zephyr/zbus/zbus.h>
 #include <stdint.h>
 
 /* The information stored in app_info channel of zbus
@@ -20,4 +20,4 @@ struct app_info_msg {
     } hardware_version;
 };
 
-#endif
+ZBUS_CHAN_DECLARE(app_info_chan);

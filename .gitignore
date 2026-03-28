@@ -1,0 +1,5 @@
+.clangd
+.clang-tidy-ignore
+.cache
+build/*
+

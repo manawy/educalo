@@ -5,7 +5,7 @@
 
 / {
     zephyr,user {
-        io-channels = <&i2c_adc 0>;
+        //io-channels = <&i2c_adc 0>;
     };
     chosen {
         zephyr,console = &cdc_acm_uart0;
@@ -17,6 +17,7 @@
         fluxsensor = &i2c_adc;
         btnstart = &button0;
         boardt = &sht35;
+        fluxsensor = &ads1115;
     };
     leds {
         compatible = "gpio-leds";
@@ -60,7 +61,7 @@
 &i2c0 {
     status = "okay";
 
-    i2c_adc: ads1115@48 {
+    /*i2c_adc: ads1115@48 {
         status = "okay";
         compatible = "ti,ads1115";
         reg = <0x48>;
@@ -77,12 +78,17 @@
             zephyr,input-negative = <3>;
             zephyr,resolution = <16>;
         };
+    }; */
+    ads1115: ads1115@48 {
+        compatible = "ti,ads1115sensor";
+        reg = <0x48>;
+        status = "okay";
     };
 
     ds3231: ds3231@68 {
         compatible = "maxim,ds3231-mfd";
         reg = <0x68>;
-        status = "disabled";
+        status = "okay";
 
         ds3231_sensor: ds3231_sensor {
                 compatible = "maxim,ds3231-sensor";

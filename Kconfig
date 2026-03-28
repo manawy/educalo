@@ -1,3 +1,16 @@
+menu "Zephyr"
 source "Kconfig.zephyr"
+endmenu
+
+menu "Calobus"
+
+config HEARTBEAT_MSEC
+    int "Measurement heartbeat in msec"
+    default 500
+    help
+        The default measurement period
+
+endmenu
 
 #rsource "drivers/Kconfig"
+

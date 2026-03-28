@@ -1,8 +1,9 @@
+#include <zephyr/kernel.h>
+
 #include "sensor_thread.h"
 #include "zephyr/devicetree.h"
 
 #include <stdint.h>
-#include <zephyr/kernel.h>
 #include <zephyr/zbus/zbus.h>
 #include <zephyr/logging/log.h>
 

@@ -7,6 +7,8 @@
 
 #include "app_info.h"
 #include "leds_interface.h"
+#include "toggle_measurement.h"
+#include "filesystem.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -19,27 +21,9 @@
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
-ZBUS_CHAN_DECLARE(app_info_chan, sensor_data_chan);
 
-ZBUS_OBS_DECLARE(sensor_thread_sub);
-
-ZBUS_LISTENER_DEFINE(leds_busy_listener, listener_ledbusy_set);
-
-ZBUS_CHAN_DEFINE(start_trigger_chan,
-                uint8_t,
-                NULL, NULL,
-                //ZBUS_OBSERVERS(sensor_thread_sub),
-                ZBUS_OBSERVERS(leds_busy_listener, sensor_thread_sub),
-                0);
-
-void run_trigger() {
-    LOG_DBG("run trigger");
-    zbus_chan_notify(&start_trigger_chan, K_MSEC(100));
-}
-
-K_TIMER_DEFINE(heartbeat_timer, run_trigger, NULL);
-
-// --- Console
+//      Console
+//---------------------
 
 void console_init() {
     #if DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_console), zephyr_cdc_acm_uart)
@@ -55,6 +39,9 @@ void console_init() {
     #endif
 }
 
+//     Input
+// -------------------
+
 bool is_ready = false;
 bool MeasurementOn = false;
 
@@ -64,26 +51,32 @@ static void btn_toggle_measurement(struct input_event *evt, void *user_data) {
     }
     if ((evt->code == INPUT_KEY_0) & (evt->value == 0)) {
         if (!MeasurementOn) {
-            LOG_PRINTK(" ---- Start measurement ---- \n");
-            k_timer_start(&heartbeat_timer, K_SECONDS(1), K_SECONDS(1));
-            MeasurementOn = true;
+            MeasurementOn = start_measurement();
         } else {
-            LOG_PRINTK(" ---- Stop measurement ---- \n");
-            k_timer_stop(&heartbeat_timer);
-            MeasurementOn = false;
+            MeasurementOn = end_measurement();
         }
     }
 }
 INPUT_CALLBACK_DEFINE(NULL, btn_toggle_measurement, NULL);
 
-// ---- Main
+//       Main
+//------------------
 
 int main() {
     console_init();
+    LOG_INF("Start main");
     int ret = ledbusy_init();
     if (ret <0) {
         LOG_ERR("Error led init");
     }
+
+    LOG_INF("Initializing SD card");
+
+    ret = init_sd_card();
+    if (ret < 0) {
+        LOG_ERR("No SD card");
+    }
+    LOG_INF("Init SD card done");
 
     struct app_info_msg* app_info = 
         (struct app_info_msg*) zbus_chan_const_msg(&app_info_chan);
