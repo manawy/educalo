@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Fabien Georget <fabien.georget@usherbrooke.ca>
+ * SPDX-Licence-Identifier: Apache-2.0
+ */
+
 #include "processing_thread.h"
 #include "leds_interface.h"
 #include "toggle_measurement.h"
