@@ -15,14 +15,13 @@
  */
 
 #include "processing_thread.h"
-#include "leds_interface.h"
 #include "toggle_measurement.h"
+#include "zbus_channels.h"
 #include <zephyr/drivers/rtc.h>
 
 #include <stdint.h>
 #include <stdio.h>
 #include <zephyr/kernel.h>
-#include <zephyr/zbus/zbus.h>
 #include <zephyr/logging/log.h>
 
 #ifdef CONFIG_SDLOGGING
@@ -31,20 +30,6 @@
 #endif
 
 LOG_MODULE_REGISTER(datalogger_thread, LOG_LEVEL_INF);
-
-// ------- ZBUS ------------------
-
-ZBUS_SUBSCRIBER_DEFINE(datalogger_thread_sub, 4);
-
-ZBUS_LISTENER_DEFINE(leds_busy_end_listener, listener_ledbusy_set);
-
-ZBUS_CHAN_DEFINE(end_onebeat_chan,
-                 int,
-                 NULL,
-                 NULL,
-                 ZBUS_OBSERVERS(leds_busy_end_listener),
-                 ZBUS_MSG_INIT(0)
-                 );
 
 // ---- Static global variables ------------------
 

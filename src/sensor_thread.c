@@ -2,13 +2,14 @@
  * Copyright (c) 2026 Fabien Georget <fabien.georget@usherbrooke.ca>
  * SPDX-Licence-Identifier: Apache-2.0
  */
+
 #include <zephyr/kernel.h>
 
 #include "sensor_thread.h"
+#include "toggle_measurement.h"
 #include "zephyr/devicetree.h"
+#include "zbus_channels.h"
 
-#include <stdint.h>
-#include <zephyr/zbus/zbus.h>
 #include <zephyr/logging/log.h>
 
 #include <zephyr/device.h>
@@ -22,16 +23,6 @@
 LOG_MODULE_REGISTER(sensor_thread, LOG_LEVEL_INF);
 
 // --- Zbus ------
-ZBUS_SUBSCRIBER_DEFINE(sensor_thread_sub, 4);
-ZBUS_OBS_DECLARE(processing_thread_sub);
-
-ZBUS_CHAN_DEFINE(sensor_data_chan,
-                 struct sensor_data_msg,
-                 NULL,
-                 NULL,
-                 ZBUS_OBSERVERS(processing_thread_sub),
-                 ZBUS_MSG_INIT(0)
-                 );
 
 // --- Device tree -----------
 #ifdef CONFIG_DT_HAS_TI_ADS1115_ENABLED
@@ -65,6 +56,11 @@ static int adc_init(const struct device* dev) {
         LOG_ERR_DEVICE_NOT_READY(dev);
         return -1;
     }
+
+    struct sensor_value val;
+    sensor_value_from_float(&val, 2.048);
+    sensor_attr_set(fluxsensor, SENSOR_CHAN_VOLTAGE, SENSOR_ATTR_GAIN, &val);
+
     return 0;
 }
 #endif
@@ -98,12 +94,39 @@ static bool adc_measure_heat(struct adc_sequence* sequence, int32_t* value) {
 }
 #endif
 
+
+void get_current_fsr(struct sensor_value *val) {
+    sensor_attr_get(fluxsensor, SENSOR_CHAN_VOLTAGE, SENSOR_ATTR_GAIN, val);
+}
+
 // --- Thread definition
+
+static void get_and_publish() {
+    struct sensor_data_msg sdata;
+
+    #ifdef CONFIG_DT_HAS_TI_ADS1115_ENABLED
+        //bool ok = false;
+        int32_t value;
+        bool ok = adc_measure_heat(&sequence, &value);
+        //LOG_PRINTK("data: %d", value);
+        //LOG_PRINTK("data ok ?: %d\n", sdata.ok);
+        sdata.ok = ok;
+        sdata.uv.val1 = value;
+    #elif defined CONFIG_DT_HAS_TI_ADS1115SENSOR_ENABLED
+        struct sensor_value sens_val;
+        sensor_sample_fetch(fluxsensor);
+        sensor_channel_get(fluxsensor, SENSOR_CHAN_VOLTAGE, &sens_val);
+        sdata.uv = sens_val;
+        sdata.ok = true;
+    #endif
+
+    zbus_chan_pub(&sensor_data_chan, &sdata, K_MSEC(100));
+
+}
 
 void sensor_thread() {
 
     const struct zbus_channel* chan;
-    struct sensor_data_msg sdata = {.ok=false};
  
     #ifdef CONFIG_DT_HAS_TI_ADS1115_ENABLED
     uint16_t buffer;
@@ -116,31 +139,23 @@ void sensor_thread() {
         adc_init(&sequence);
     }
     #elif defined CONFIG_DT_HAS_TI_ADS1115SENSOR_ENABLED
-    struct sensor_value sens_val;
     adc_init(fluxsensor);
-
     #endif
 
     while(1) {
         zbus_sub_wait(&sensor_thread_sub, &chan, K_FOREVER);
 
-
-        #ifdef CONFIG_DT_HAS_TI_ADS1115_ENABLED
-        //bool ok = false;
-        int32_t value;
-        bool ok = adc_measure_heat(&sequence, &value);
-        //LOG_PRINTK("data: %d", value);
-        //LOG_PRINTK("data ok ?: %d\n", sdata.ok);
-        sdata.ok = ok;
-        sdata.uv.val1 = value;
-        #elif defined CONFIG_DT_HAS_TI_ADS1115SENSOR_ENABLED
-        sensor_sample_fetch(fluxsensor);
-        sensor_channel_get(fluxsensor, SENSOR_CHAN_VOLTAGE, &sens_val);
-        sdata.uv = sens_val;
-        sdata.ok = true;
-        #endif
-
-        zbus_chan_pub(&sensor_data_chan, &sdata, K_MSEC(100));
+        if (&sensor_attr_chan == chan) {
+            struct sensor_attr_msg msg;
+            zbus_chan_read(&sensor_data_chan, &msg, K_MSEC(10));
+            sensor_attr_set(fluxsensor, SENSOR_CHAN_VOLTAGE, msg.attr, &msg.val);
+            continue;
+        } else if (&start_trigger_chan == chan) {
+            get_and_publish();
+            continue;
+        } else {
+            LOG_ERR("Invalid channel !");
+        }
     }
 }
 
@@ -149,6 +164,6 @@ K_THREAD_DEFINE(sensor_thread_id,
                 sensor_thread,
                 NULL, NULL, NULL,
                 CONFIG_SENSOR_THREAD_PRIORITY, 0,
-                CONFIG_HEARTBEAT_MSEC);
+                0);
 
 

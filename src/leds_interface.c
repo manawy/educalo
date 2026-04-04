@@ -2,21 +2,19 @@
  * Copyright (c) 2026 Fabien Georget <fabien.georget@usherbrooke.ca>
  * SPDX-Licence-Identifier: Apache-2.0
  */
-
-#include <leds_interface.h>
+#include "leds_interface.h"
+#include "zbus_channels.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
 
 #include <zephyr/logging/log.h>
-#include <zephyr/zbus/zbus.h>
 
 LOG_MODULE_REGISTER(leds_interface, LOG_LEVEL_WRN);
 
 static const struct gpio_dt_spec led_busy = GPIO_DT_SPEC_GET(DT_ALIAS(ledbusy), gpios);
 static const struct gpio_dt_spec led_ok = GPIO_DT_SPEC_GET(DT_ALIAS(ledok), gpios);
 
-ZBUS_CHAN_DECLARE(start_trigger_chan)   ;
 
 int ledbusy_init() {
     if (!gpio_is_ready_dt(&led_busy)) {

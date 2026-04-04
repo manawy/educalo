@@ -4,28 +4,44 @@
  */
 
 #include "processing_thread.h"
+#include "zbus_channels.h"
 #include "sensor_thread.h"
 #include "zephyr/drivers/sensor.h"
 
 #include <stdint.h>
 #include <zephyr/kernel.h>
-#include <zephyr/zbus/zbus.h>
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(core_thread, LOG_LEVEL_INF);
 
+static int64_t current_fsr;
 
-ZBUS_SUBSCRIBER_DEFINE(processing_thread_sub, 4);
-ZBUS_OBS_DECLARE(datalogger_thread_sub);
+static void check_gain(int64_t value) 
+{
+   int64_t requested_fsr = 0; 
+    if (value < 171000) {
+        requested_fsr = 256000;
+    } else if (value < 426000) {
+        requested_fsr = 512000;
+    } else if (value < 683000) {
+        requested_fsr = 1024000;
+    } else {
+        requested_fsr = 2048000;
+    };
+    if (requested_fsr == current_fsr) {
+        return;
+    }
 
-ZBUS_CHAN_DECLARE(end_onebeat_chan) ;
-ZBUS_CHAN_DEFINE(processing_thread_chan,
-                 struct processing_thread_msg,
-                 NULL,
-                 NULL,
-                 ZBUS_OBSERVERS(datalogger_thread_sub),
-                 ZBUS_MSG_INIT(0)
-                 );
+    struct sensor_attr_msg msg;
+    msg.attr = SENSOR_ATTR_GAIN;
+    LOG_INF("Request new gain: %lld", requested_fsr);
+    sensor_value_from_micro(&msg.val, requested_fsr);
+    int rc = zbus_chan_pub(&sensor_attr_chan, &msg, K_MSEC(100));
+    if (rc == 0) {
+        current_fsr = requested_fsr;
+    }
+}
+
 
 // Process one sample and notify/publish accordingly
 static void process_one(struct sensor_data_msg *msg)
@@ -38,7 +54,10 @@ static void process_one(struct sensor_data_msg *msg)
     }
 
     struct processing_thread_msg processed_data = {.to_save=0, .value=0};
-    buffer += msg->uv.val1;
+    int64_t val = sensor_value_to_micro(&msg->uv);
+    buffer += val;
+
+    check_gain(val);
 
     if (++counter < CONFIG_OVERSAMPLING) {
         // nothing to do - wait for nex sample
@@ -57,10 +76,18 @@ static void process_one(struct sensor_data_msg *msg)
     return;
 }
 
+void init_current_fsr() {
+    struct sensor_value val;
+    get_current_fsr(&val);
+    current_fsr = sensor_value_to_micro(&val);
+}
+
 void processing_thread()
 {
     const struct zbus_channel* chan;
     struct sensor_data_msg msg;
+
+    init_current_fsr();
 
     while(1) {
         zbus_sub_wait(&processing_thread_sub, &chan, K_FOREVER);

@@ -15,5 +15,4 @@ struct processing_thread_msg {
     int64_t timestamp;
 };
 
-ZBUS_CHAN_DECLARE(processing_thread_chan);
 

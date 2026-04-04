@@ -13,7 +13,6 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
-#include <zephyr/zbus/zbus.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/input/input.h>
 
