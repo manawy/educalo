@@ -14,6 +14,7 @@ project(CaloBus)
 set (APP_SOURCES
 
     src/main.c
+    src/calo_time.c
     src/filesystem.c
     src/health_check.c
     src/zbus_channels.c

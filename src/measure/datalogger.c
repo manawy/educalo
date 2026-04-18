@@ -23,12 +23,6 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/rtc.h>
 
-#ifdef CONFIG_RTC_EMUL
-#include <native_rtc.h>
-#include <time.h>
-#endif
-
-
 #ifdef CONFIG_SDLOGGING
 #include "filesystem.h"
 #include <zephyr/fs/fs.h>
@@ -131,15 +125,6 @@ static int datalog_end() {
 
 void datalogger_thread(void) {
     const struct zbus_channel* chan;
-
-    #ifdef CONFIG_RTC_EMUL
-        struct timespec ts ={.tv_sec=0,.tv_nsec=0};
-        uint32_t nsec = 0;
-        native_rtc_gettime(RTC_CLOCK_PSEUDOHOSTREALTIME, &nsec, &ts.tv_sec);
-        struct rtc_time tm;
-        gmtime_r(&ts.tv_sec, rtc_time_to_tm(&tm));
-        rtc_set_time(rtc, &tm);
-    #endif
 
     while(1) {
         zbus_sub_wait(&datalogger_thread_sub, &chan, K_FOREVER);

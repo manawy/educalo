@@ -7,6 +7,8 @@
 #include "interface/leds.h"
 #include "measure/toggle.h"
 #include "filesystem.h"
+#include "calo_time.h"
+#include "time.h"
 
 #include <stdbool.h>
 
@@ -34,11 +36,18 @@ void console_init() {
     #endif
 }
 
+
+void rtc_init() {
+
+}
+
 //       Main
 //------------------
 
 
 int main() {
+    init_time();
+
     console_init();
     LOG_INF("Start main");
     int ret = ledbusy_init();
