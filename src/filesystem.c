@@ -31,7 +31,20 @@ static struct fs_mount_t mp_sd = {
 
 static const char *disk_mount_pt = DISK_MOUNT_POINT;
 
-int init_sd_card() {
+void init_filesystem()
+{
+    #ifdef CONFIG_SDLOGGING
+    LOG_INF("Initializing SD card");
+    int ret = init_sd_card();
+    if (ret < 0) {
+        LOG_ERR("No SD card");
+    }
+    LOG_INF("Init SD card done");
+    #endif
+}
+
+int init_sd_card()
+{
     do {
         static const char *disk_pdrv = DISK_DRIVE_NAME;
         

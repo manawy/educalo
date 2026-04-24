@@ -5,6 +5,28 @@
 
 #include <zephyr/shell/shell.h>
 #include "measure/toggle.h"
+#include <zephyr/drivers/uart.h>
+
+//    Console
+// -------------
+//
+void console_init() {
+    #if DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_console), zephyr_cdc_acm_uart)
+        const struct device *const dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));
+        uint32_t dtr = 0;
+
+        /* Poll if the DTR flag was set */
+        while (!dtr) {
+            uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
+            /* Give CPU resources to low priority threads. */
+            k_sleep(K_MSEC(100));
+        }
+    #endif
+}
+
+
+// Shell
+// -----
 
 static int start_handler(const struct shell *sh, size_t argc,
                         char **argv) {

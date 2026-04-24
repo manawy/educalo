@@ -14,14 +14,18 @@ project(CaloBus)
 set (APP_SOURCES
 
     src/main.c
+
     src/calo_time.c
     src/filesystem.c
     src/health_check.c
     src/zbus_channels.c
+
     src/measure/datalogger.c
     src/measure/processor.c
     src/measure/sensor.c
     src/measure/toggle.c
+
+    src/interface/init.c
     src/interface/leds.c
 
 )

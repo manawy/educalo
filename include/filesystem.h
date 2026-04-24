@@ -10,6 +10,9 @@
 #define DISK_DRIVE_NAME "SD"
 #define DISK_MOUNT_POINT "/SD:"
 
+// Initialize the filesystem according configuration
+void init_filesystem();
+
 // SD Card initialization
 //
 // Check if sd card is in and mount filesystem
