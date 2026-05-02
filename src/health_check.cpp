@@ -89,8 +89,7 @@ void health_check_thread() {
         if (ret !=0) {
             LOG_ERR("Failed reading board temperature");
         } else {
-            auto temp = checker.board_temperature();
-            LOG_PRINTK("Board temperature %.2f\n", temp);
+            LOG_PRINTK("Board temperature : %.2f Celsius.\n", checker.board_temperature());
         }
 
         k_sleep(K_SECONDS(CONFIG_HEALTHCHECK_BEAT_SECONDS));
