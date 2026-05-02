@@ -8,13 +8,14 @@
  *
  */
 
-#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    // init time - call once after reset
+struct tm;
+
+// init time - call once after reset
 int init_time();
 
 // return the wall time

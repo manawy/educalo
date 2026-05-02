@@ -3,11 +3,18 @@
 
 #include "calo_time.h"
 
+#ifdef CONFIG_POSIX_API
+#define _POSIX_C_SOURCE 200112L
+#include <time.h>
+#endif
+
 #include <zephyr/sys/clock.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/rtc.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/timeutil.h>
+
+
 
 LOG_MODULE_REGISTER(time, CONFIG_LOG_DEFAULT_LEVEL);
 
@@ -24,7 +31,7 @@ void init_time_emul()
 {
         struct timespec ts ={.tv_sec=0,.tv_nsec=0};
         uint32_t nsec = 0;
-        native_rtc_gettime(RTC_CLOCK_PSEUDOHOSTREALTIME, &nsec, &ts.tv_sec);
+        native_rtc_gettime(RTC_CLOCK_PSEUDOHOSTREALTIME, &nsec, (uint64_t*) &ts.tv_sec);
         struct rtc_time tm;
         gmtime_r(&ts.tv_sec, rtc_time_to_tm(&tm));
         rtc_set_time(rtc, &tm);
