@@ -140,6 +140,7 @@ void get_sd_timed_path(char *path,
     strncpy(buf, prefix, lenp);
     get_time_string(tm, buf, lenp);
 
-   strncpy(&buf[strlen(buf)], suffix, strlen(suffix));
+   strncpy(&buf[strlen(buf)], suffix, strlen(suffix)+1); // +1 for \0
+
    get_sd_full_path(path, buf); 
 }
