@@ -17,6 +17,7 @@
 #include "measure/toggle.h"
 #include "zbus_channels.h"
 #include "calo_time.h"
+#include "zephyr/zbus/zbus.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -244,6 +245,7 @@ void datalogger_thread(void) {
             Logger.start(timestamp_0);
         } else if (&end_measure_chan == chan) {
             Logger.stop();
+            zbus_chan_notify(&measurement_ready_chan, K_MSEC(50));
         }
     }
 }

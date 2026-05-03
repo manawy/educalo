@@ -44,7 +44,6 @@ static int adc_init(struct adc_sequence* sequence) {
     LOG_INF("ADC: initialized");
     return 0;
 }
-#elif defined CONFIG_FLUXSENSOR
 #endif
 
 
@@ -80,10 +79,10 @@ static bool adc_measure_heat(struct adc_sequence* sequence, int32_t* value) {
 
 // --- Thread definition
 
+#ifdef CONFIG_DT_HAS_TI_ADS1115_ENABLED
 static void get_and_publish() {
     struct sensor_data_msg sdata;
 
-    #ifdef CONFIG_DT_HAS_TI_ADS1115_ENABLED
         //bool ok = false;
         int32_t value;
         bool ok = adc_measure_heat(&sequence, &value);
@@ -91,12 +90,10 @@ static void get_and_publish() {
         //LOG_PRINTK("data ok ?: %d\n", sdata.ok);
         sdata.ok = ok;
         sdata.uv.val1 = value;
-    #elif defined CONFIG_FLUXSENSOR
-    #endif
 
     zbus_chan_pub(&sensor_data_chan, &sdata, K_MSEC(100));
-
 }
+#endif
 
 class FluxSensor
 {

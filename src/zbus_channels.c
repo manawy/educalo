@@ -7,12 +7,15 @@
 #include "zbus_channels.h"
 #include "app_info.h"
 #include "interface/leds.h"
+#include "measure/toggle.h"
 
 ZBUS_SUBSCRIBER_DEFINE(sensor_thread_sub, 4);
 ZBUS_SUBSCRIBER_DEFINE(processing_thread_sub, 4);
 ZBUS_SUBSCRIBER_DEFINE(datalogger_thread_sub, 4);
 ZBUS_LISTENER_DEFINE(leds_busy_listener, listener_ledbusy_set);
-ZBUS_LISTENER_DEFINE(leds_busy_end_listener, listener_ledbusy_set);
+ZBUS_LISTENER_DEFINE(leds_on_listener, listener_ledon_set);
+ZBUS_LISTENER_DEFINE(set_measurement_ready_listener, toggle_measurement_ready);
+
 
 ZBUS_CHAN_DEFINE(
     app_info_chan,
@@ -26,10 +29,16 @@ ZBUS_CHAN_DEFINE(
 
 // -- Toggle measurement
 
+ZBUS_CHAN_DEFINE(measurement_ready_chan,
+                 uint8_t,
+                 NULL, NULL,
+                 ZBUS_OBSERVERS(set_measurement_ready_listener, leds_on_listener),
+                 0);
+
 ZBUS_CHAN_DEFINE(start_measure_chan,
                  uint8_t,
                  NULL, NULL,
-                 ZBUS_OBSERVERS(datalogger_thread_sub),
+                 ZBUS_OBSERVERS(datalogger_thread_sub, leds_on_listener),
                  0);
 
 ZBUS_CHAN_DEFINE(end_measure_chan,
@@ -74,6 +83,6 @@ ZBUS_CHAN_DEFINE(end_onebeat_chan,
                  int,
                  NULL,
                  NULL,
-                 ZBUS_OBSERVERS(leds_busy_end_listener),
+                 ZBUS_OBSERVERS(leds_busy_listener),
                  ZBUS_MSG_INIT(0)
                  );

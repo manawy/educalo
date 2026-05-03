@@ -7,8 +7,7 @@
 
 #include <zephyr/zbus/zbus.h>
 
-int ledbusy_init();
+int leds_init();
 void listener_ledbusy_set(const struct zbus_channel *chan);
+void listener_ledon_set(const struct zbus_channel *chan);
 
-int ledon_init();
-void ledon_start();

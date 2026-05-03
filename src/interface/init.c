@@ -13,7 +13,7 @@ LOG_MODULE_REGISTER(init_interface, CONFIG_LOG_DEFAULT_LEVEL);
 void init_interface() {
     console_init();
     LOG_INF("Start main");
-    int ret = ledbusy_init();
+    int ret = leds_init();
     if (ret <0) {
         LOG_ERR("Error led init");
     }

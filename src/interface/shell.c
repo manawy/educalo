@@ -35,7 +35,7 @@ static int start_handler(const struct shell *sh, size_t argc,
 }
 static int end_handler(const struct shell *sh, size_t argc,
                         char **argv) {
-    end_measurement();
+    stop_measurement();
     return 0;
 }
 static int status_handler(const struct shell *sh, size_t argc,
@@ -45,6 +45,10 @@ static int status_handler(const struct shell *sh, size_t argc,
         shell_print(sh, "Measurement ongoing");
     } else {
         shell_print(sh, "No measurement ongoing");
+        if (is_measurement_ready()) 
+            shell_print(sh, "Measurement ready");
+        else
+            shell_print(sh, "Measurement not ready");
     }
     return 0;
 }

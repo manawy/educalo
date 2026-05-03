@@ -8,6 +8,10 @@
 #include <zephyr/zbus/zbus.h>
 #include <zephyr/drivers/sensor.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct processing_thread_msg {
     bool to_save;
     int32_t value;
@@ -30,6 +34,8 @@ ZBUS_OBS_DECLARE(sensor_thread_sub);
 ZBUS_OBS_DECLARE(processing_thread_sub);
 ZBUS_OBS_DECLARE(datalogger_thread_sub);
 
+ZBUS_CHAN_DECLARE(measurement_ready_chan);
+ZBUS_CHAN_DECLARE(measurement_busy_chan);
 ZBUS_CHAN_DECLARE(start_measure_chan);
 ZBUS_CHAN_DECLARE(end_measure_chan);
 
@@ -38,3 +44,7 @@ ZBUS_CHAN_DECLARE(sensor_data_chan);
 ZBUS_CHAN_DECLARE(processing_thread_chan);
 ZBUS_CHAN_DECLARE(sensor_attr_chan);
 ZBUS_CHAN_DECLARE(end_onebeat_chan) ;
+
+#ifdef __cplusplus
+} // extern C
+#endif

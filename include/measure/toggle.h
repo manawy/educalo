@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "zephyr/zbus/zbus.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -22,7 +21,7 @@ bool start_measurement();
  *
  * Return false if measurement successfully stopped
  */
-bool end_measurement();
+bool stop_measurement();
 
 /* Toggle the measurement state
  */
@@ -31,13 +30,9 @@ void toggle_measurement();
 /* Return true if equipment is ready */
 bool is_measurement_ready();
 /* Call when measurement ready */
-void set_measurement_ready();
+void toggle_measurement_ready();
 /* Return true if measurement is on  */
 bool is_measurement_on();
-
-ZBUS_CHAN_DECLARE(start_measure_chan);
-ZBUS_CHAN_DECLARE(start_trigger_chan);
-ZBUS_CHAN_DECLARE(end_measure_chan);
 
 #ifdef __cplusplus
 }

@@ -6,12 +6,12 @@
 #include "calo_time.h"
 #include "filesystem.h"
 #include "interface/init.h"
-#include "measure/toggle.h"
+#include "zbus_channels.h"
 
 int main() {
     init_time();
     init_filesystem();
     init_interface();
-    set_measurement_ready();
+    zbus_chan_notify(&measurement_ready_chan, K_MSEC(50));
     return 0;
 }
