@@ -14,16 +14,6 @@
 extern "C" {
 #endif
 
-// Initialize the filesystem according configuration
-void init_filesystem();
-
-// SD Card initialization
-//
-// Check if sd card is in and mount filesystem
-int init_sd_card();
-
-// SD Card de-initialization
-int de_init_sd_card();
 
 // Return a full path at the root of the SD card
 void get_sd_full_path(char *path, const char* filename);

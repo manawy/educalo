@@ -16,7 +16,7 @@ set (APP_SOURCES
     src/main.cpp
 
     src/calo_time.c
-    src/filesystem.c
+    src/filesystem.cpp
     src/health_check.cpp
     src/zbus_channels.c
 
