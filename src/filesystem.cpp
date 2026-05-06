@@ -18,12 +18,13 @@
 
 LOG_MODULE_REGISTER(filesystem, LOG_LEVEL_INF);
 
-#include <ff.h>
-
 static constexpr std::string_view disk_mount_pt = DISK_MOUNT_POINT;
 static constexpr std::string_view disk_name = DISK_DRIVE_NAME;
 
-struct fatfs_mount 
+#ifdef CONFIG_FAT_FILESYSTEM_ELM
+#include <ff.h>
+
+struct SDFATFSMount
 {
     FATFS fat_fs;
     struct fs_mount_t mp_sd = {
@@ -37,6 +38,31 @@ struct fatfs_mount
     }
 };
 
+typedef SDFATFSMount SDMount;
+
+#elifdef CONFIG_FILE_SYSTEM_LITTLEFS
+#include <zephyr/fs/littlefs.h>
+
+struct SDLittleFSMount
+{
+    struct fs_littlefs lfsfs;
+    struct fs_mount_t mp_sd = {
+        .type = FS_LITTLEFS,
+        .fs_data = &lfsfs,
+        .flags = FS_MOUNT_FLAG_USE_DISK_ACCESS,
+    };
+    int FS_RET_OK = 0;
+    void set_mount_point() {
+        mp_sd.mnt_point = disk_mount_pt.data();
+    }
+
+    SDLittleFSMount() {
+        mp_sd.storage_dev = (void *) disk_name.data();
+    };
+};
+
+typedef SDLittleFSMount SDMount;
+#endif
 
 
 template <typename MountClass>
@@ -104,7 +130,7 @@ int SDCardDisk<MountClass>::deinit()
     return 0;
 }
 
-static auto  sd_card = SDCardDisk<fatfs_mount>();
+static auto sd_card = SDCardDisk<SDMount>();
 
 void get_sd_full_path(char *path, const char* filename) {
     // TODO check

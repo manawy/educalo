@@ -189,7 +189,7 @@ int FileDataLogger::log_one(const struct processing_thread_msg* const data)
     snprintf(m_buf, 128, "%lld,%d\n",
         data->timestamp - get_t0(),
         data->value);
-    int ret = fs_write(&m_file, &m_buf, 128);
+    int ret = fs_write(&m_file, &m_buf, strlen(m_buf));
 
     if (ret <0)
     {
